@@ -1,19 +1,22 @@
 # viewer360
 
-Repository containing simple panoramic images viewer 
-written with pure JS & three.js 
+Simple panoramic images viewer.
+Based on three.js example: https://threejs.org/examples/?q=panorama#webgl_panorama_equirectangular
 
-* Example images:
+The panoramic image can be passed as query string parameter [uri]
 
-Default: 
+https://mmsoftpl.github.io/viewer360?uri=[imageUrl]
+
+#
+* Default: 
 https://mmsoftpl.github.io/viewer360/
 
-Custom image
+* With custom image
 https://mmsoftpl.github.io/viewer360/?uri=https://upload.wikimedia.org/wikipedia/commons/3/3e/Croatia_Ribarica_beach_panorama_360.jpg
 (image from https://upload.wikimedia.org/wikipedia/commons/3/3e/Croatia_Ribarica_beach_panorama_360.jpg)
 
-Main index page:
-https://mmsoftpl.github.io/viewer360/
+
+
 
 
 
