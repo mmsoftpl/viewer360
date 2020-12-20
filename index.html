@@ -33,9 +33,9 @@
 	<div id="info" style="position: absolute; left:0px; top:0px">
 		<div class="input-group mb-3">
 			<button class="btn btn-primary" type="button" id="button-showhide" onclick="return showHide();" title="Open/Close image URL panel"><i class="fas fa-image"></i></button>
-			<form class="form-floating d-none" style="vertical-align: middle; text-align: center; width:80vw"
+			<form class="form-floating d-none" style="vertical-align: middle; text-align: center; width:60vw"
 				id="uriPanel">
-				<input type="url" class="form-control" id="textureUri" placeholder="texture URI"
+				<input type="text" class="form-control" id="textureUri" placeholder="texture URI"
 					value="images/Deep Rock Galactic 360 2020.12.19 - 21.34.03.75.jpg">
 				<label for="floatingInputValue">Enter location of panorama 360&#176; image:</label>
 			</form>
@@ -50,6 +50,8 @@
 		import * as THREE from 'https://unpkg.com/three@0.123.0/build/three.module.js';
 
 		let camera, scene, renderer, texture;
+
+		const uriKey = "uri";
 
 		let isUserInteracting = false,
 			onPointerDownMouseX = 0, onPointerDownMouseY = 0,
@@ -66,14 +68,17 @@
 			myimage.onload = () => {
 				texture.image = myimage;
 				texture.needsUpdate = true;
+				document.getElementById('textureUri').classList.remove("is-invalid");
+				window.history.pushState(document.title, document.title, `?${uriKey}=${textureUri}`);
 			};
 			myimage.onerror = (err) => {
-				//reject(myimage);
-				alert(err);
+				alert(`Error loading image: \n ${textureUri}`);
+				
+				document.getElementById('textureUri').classList.add("is-invalid");
 			};
 			myimage.onabort = (msg) => {
-				//	reject(myimage);
-				alert(msg);
+				document.getElementById('textureUri').classList.add("is-invalid");
+				alert(`Aborting loading image: \n ${textureUri}`);
 			};
 			myimage.crossOrigin = "anonymous";
 			myimage.src = textureUri;
@@ -82,8 +87,17 @@
 		function apply() {
 			isUserInteracting = false;
 			const textureUriInput = document.getElementById('textureUri');
-			loadTexture(textureUriInput.value);
+			const uri = textureUriInput.value;
+			loadTexture(uri);	
+
 			return false;
+		}
+
+		function getQueryParam(url, name) {
+			name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+			var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+				results = regex.exec(url);
+			return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 		}
 
 		function init() {
@@ -100,7 +114,21 @@
 
 			texture = new THREE.Texture();
 
+			let uriFromUrl = getQueryParam(window.location, uriKey);
+
+			if (uriFromUrl)
+			{
+				document.getElementById('textureUri').value = uriFromUrl;
+			}
+
 			document.getElementById('button-apply').addEventListener('click', apply);
+			document.getElementById('textureUri').addEventListener("keydown",(e)=>
+			{
+				if(e.which == 13){
+					apply();
+					event.preventDefault();
+				}				
+			});
 			apply();
 
 			const material = new THREE.MeshBasicMaterial({ map: texture });
