@@ -5,7 +5,7 @@ const fovKey = "fov";
 const latKey = "lat";
 const lonKey = "lon";
 
-function getPathFromUrl(url) {
+export const getPathFromUrl = (url) => {
   if (url.includes("?"))
     return url.split("?")[0];  
   return url

@@ -51,7 +51,7 @@ const updateControls = () => {
         if (uri)
             window.history.pushState(document.title, document.title, shareLink);
         else
-            window.history.pushState(document.title, document.title, "/");
+            window.history.pushState(document.title, document.title, getPathFromUrl(window.location.href));
             
     }, 500);
 }
