@@ -1,4 +1,4 @@
-import { GetServiceAddress } from "./utils.js";
+import { IsEmpty } from "./utils.js";
 
 const uriKey = "uri";
 const fovKey = "fov";
@@ -37,10 +37,10 @@ const asNumberOrNull = (val, min, max) => {
   if (isNaN(retValue))
     retValue = null;
   else
-    if (typeof max !== "undefined" && retValue > max)
+    if (!IsEmpty(max) && retValue > max)
       return max
     else
-      if (typeof min !== "undefined" && retValue < min)
+      if (!IsEmpty(min) && retValue < min)
         return min;
   return retValue;
 }

@@ -1,4 +1,5 @@
 import * as THREE from 'https://unpkg.com/three@0.123.0/build/three.module.js';
+import { IsEmpty } from "./utils.js";
 
 let camera, scene, renderer, texture, onUpdate;
 
@@ -99,8 +100,7 @@ function onWindowResize() {
 
 }
 
-export function ZoomIn()
-{
+export function ZoomIn() {
 	var fov = camera.fov - 1;
 	if (fov < 10)
 		fov = 10;
@@ -111,8 +111,7 @@ export function ZoomIn()
 		onUpdate();
 }
 
-export function ZoomOut()
-{
+export function ZoomOut() {
 	var fov = camera.fov + 1;
 	if (fov > 75)
 		fov = 75;
@@ -124,29 +123,25 @@ export function ZoomOut()
 }
 
 
-export function MoveUp()
-{
+export function MoveUp() {
 	lat += 1;
 	if (onUpdate)
 		onUpdate();
 }
 
-export function MoveDown()
-{
+export function MoveDown() {
 	lat -= 1;
 	if (onUpdate)
 		onUpdate();
 }
 
-export function MoveLeft()
-{
+export function MoveLeft() {
 	lon -= 1;
 	if (onUpdate)
 		onUpdate();
 }
 
-export function MoveRight()
-{
+export function MoveRight() {
 	lon += 1;
 	if (onUpdate)
 		onUpdate();
@@ -213,15 +208,15 @@ function onDocumentMouseWheel(event) {
 
 export const setCameraProps = (cameraProps) => {
 
-	if (cameraProps) {
-		if (typeof cameraProps.fov !== "undefined") camera.fov = cameraProps.fov;
-		if (typeof cameraProps.lat !== "undefined") lat = cameraProps.lat;
-		if (typeof cameraProps.lon !== "undefined") lon = cameraProps.lon;
+	if (!IsEmpty(cameraProps)) {
+		if (!IsEmpty(cameraProps.fov)) camera.fov = cameraProps.fov;
+		if (!IsEmpty(cameraProps.lat)) lat = cameraProps.lat;
+		if (!IsEmpty(cameraProps.lon)) lon = cameraProps.lon;
 
 		camera.updateProjectionMatrix();
 
 		if (onUpdate)
-			onUpdate();		
+			onUpdate();
 	}
 }
 

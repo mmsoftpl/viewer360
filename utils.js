@@ -44,3 +44,14 @@ export const eventFire = (el, etype) => {
         el.dispatchEvent(evObj);
     }
 }
+
+
+export function IsEmpty(value) {
+    if (typeof value === "undefined") return true;
+    if (value == null) return true;
+
+    if (Array.isArray(value) || IsString(value))
+        return value.length == 0;
+
+    return Object.keys(value).length === 0 && value.constructor === Object;
+}
