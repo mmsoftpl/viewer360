@@ -5,277 +5,153 @@
 	<title>360&#176; viewer</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
 	<script defer src="vendor/fontawesome/all.min.js"></script>
 </head>
 
 <body>
-
-	<script>
-		function showHide() {
-			let uriPanelComponent = document.getElementById('uriPanel');
-			if (uriPanelComponent.classList.contains("d-none"))
-			{
-				uriPanelComponent.classList.remove("d-none");
-				document.getElementById('button-apply').classList.remove("d-none");
-			}
-			else
-			{
-				uriPanelComponent.classList.add("d-none");
-				document.getElementById('button-apply').classList.add("d-none");
-			}
-			return false;
-		}
-	</script>
-
-	<div id="container" style="position: absolute; left:0px; top:0px"></div>
-	<div id="info" style="position: absolute; left:0px; top:0px">
-		<div class="input-group mb-3">
-			<button class="btn btn-primary" type="button" id="button-showhide" onclick="return showHide();" title="Open/Close image URL panel"><i class="fas fa-image"></i></button>
-			<form class="form-floating d-none" style="vertical-align: middle; text-align: center; width:60vw"
-				id="uriPanel">
-				<input type="text" class="form-control" id="textureUri" placeholder="texture URI"
-					value="images/Deep Rock Galactic 360 2020.12.19 - 21.34.03.75.jpg">
-				<label for="floatingInputValue">Enter location of panorama 360&#176; image:</label>
-			</form>
-			<button class="btn btn-primary d-none" type="button" id="button-apply">Apply</button>
+	<div id="spinner" style="position: absolute; left:50%; top:50%;z-index: 9999;" class="text-warning">
+		<div class="d-flex justify-content-center">
+			<div class="spinner-border" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
 		</div>
 	</div>
 
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
-
-	<script type="module">
-
-		import * as THREE from 'https://unpkg.com/three@0.123.0/build/three.module.js';
-
-		let camera, scene, renderer, texture;
-
-		const uriKey = "uri";
-
-		let isUserInteracting = false,
-			onPointerDownMouseX = 0, onPointerDownMouseY = 0,
-			lon = 0, onPointerDownLon = 0,
-			lat = 0, onPointerDownLat = 0,
-			phi = 0, theta = 0;
-
-		init();
-		animate();
-
-		function loadTexture(textureUri) {
-			const myimage = new Image();
-
-			myimage.onload = () => {
-				texture.image = myimage;
-				texture.needsUpdate = true;
-				document.getElementById('textureUri').classList.remove("is-invalid");
-				window.history.pushState(document.title, document.title, `?${uriKey}=${textureUri}`);
-			};
-			myimage.onerror = (err) => {
-				alert(`Error loading image: \n ${textureUri}`);
-				
-				document.getElementById('textureUri').classList.add("is-invalid");
-			};
-			myimage.onabort = (msg) => {
-				document.getElementById('textureUri').classList.add("is-invalid");
-				alert(`Aborting loading image: \n ${textureUri}`);
-			};
-			myimage.crossOrigin = "anonymous";
-			myimage.src = textureUri;
-		}
-
-		function apply() {
-			isUserInteracting = false;
-			const textureUriInput = document.getElementById('textureUri');
-			const uri = textureUriInput.value;
-			loadTexture(uri);	
-
-			return false;
-		}
-
-		function getQueryParam(url, name) {
-			name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-			var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-				results = regex.exec(url);
-			return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-		}
-
-		function init() {
-
-			const container = document.getElementById('container');
-
-			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1100);
-
-			scene = new THREE.Scene();
-
-			const geometry = new THREE.SphereBufferGeometry(500, 60, 40);
-			// invert the geometry on the x-axis so that all of the faces point inward
-			geometry.scale(- 1, 1, 1);
-
-			texture = new THREE.Texture();
-
-			let uriFromUrl = getQueryParam(window.location, uriKey);
-
-			if (uriFromUrl)
-			{
-				document.getElementById('textureUri').value = uriFromUrl;
-			}
-
-			document.getElementById('button-apply').addEventListener('click', apply);
-			document.getElementById('textureUri').addEventListener("keydown",(e)=>
-			{
-				if(e.which == 13){
-					apply();
-					event.preventDefault();
-				}				
-			});
-			apply();
-
-			const material = new THREE.MeshBasicMaterial({ map: texture });
-
-			const mesh = new THREE.Mesh(geometry, material);
-
-			scene.add(mesh);
-
-			renderer = new THREE.WebGLRenderer();
-			renderer.setPixelRatio(window.devicePixelRatio);
-			renderer.setSize(window.innerWidth, window.innerHeight);
-			container.appendChild(renderer.domElement);
-
-			container.style.touchAction = 'none';
-			container.addEventListener('pointerdown', onPointerDown, false);
-
-			document.addEventListener('wheel', onDocumentMouseWheel, false);
-
-			//
-
-			document.addEventListener('dragover', function (event) {
-
-				event.preventDefault();
-				event.dataTransfer.dropEffect = 'copy';
-
-			}, false);
-
-			document.addEventListener('dragenter', function () {
-
-				document.body.style.opacity = 0.5;
-
-			}, false);
-
-			document.addEventListener('dragleave', function () {
-
-				document.body.style.opacity = 1;
-
-			}, false);
-
-			document.addEventListener('drop', function (event) {
-
-				event.preventDefault();
-
-				const reader = new FileReader();
-				reader.addEventListener('load', function (event) {
-
-					material.map.image.src = event.target.result;
-					material.map.needsUpdate = true;
-
-				}, false);
-				reader.readAsDataURL(event.dataTransfer.files[0]);
-
-				document.body.style.opacity = 1;
-
-			}, false);
-
-			//
-
-			window.addEventListener('resize', onWindowResize, false);
-
-		}
-
-		function onWindowResize() {
-
-			camera.aspect = window.innerWidth / window.innerHeight;
-			camera.updateProjectionMatrix();
-
-			renderer.setSize(window.innerWidth, window.innerHeight);
-
-		}
-
-		function onPointerDown(event) {
-
-			if (event.isPrimary === false) return;
-
-			isUserInteracting = true;
-
-			onPointerDownMouseX = event.clientX;
-			onPointerDownMouseY = event.clientY;
-
-			onPointerDownLon = lon;
-			onPointerDownLat = lat;
-
-			document.addEventListener('pointermove', onPointerMove, false);
-			document.addEventListener('pointerup', onPointerUp, false);
-
-		}
-
-		function onPointerMove(event) {
-
-			if (event.isPrimary === false) return;
-
-			lon = (onPointerDownMouseX - event.clientX) * 0.1 + onPointerDownLon;
-			lat = (event.clientY - onPointerDownMouseY) * 0.1 + onPointerDownLat;
-
-		}
-
-		function onPointerUp() {
-
-			if (event.isPrimary === false) return;
-
-			//isUserInteracting = false;
-
-			document.removeEventListener('pointermove', onPointerMove);
-			document.removeEventListener('pointerup', onPointerUp);
-
-		}
-
-		function onDocumentMouseWheel(event) {
-
-			const fov = camera.fov + event.deltaY * 0.05;
-
-			camera.fov = THREE.MathUtils.clamp(fov, 10, 75);
-
-			camera.updateProjectionMatrix();
-
-		}
-
-		function animate() {
-
-			requestAnimationFrame(animate);
-			update();
-
-		}
-
-		function update() {
-
-			if (isUserInteracting === false) {
-
-				lon += 0.1;
-
-			}
-
-			lat = Math.max(- 85, Math.min(85, lat));
-			phi = THREE.MathUtils.degToRad(90 - lat);
-			theta = THREE.MathUtils.degToRad(lon);
-
-			const x = 500 * Math.sin(phi) * Math.cos(theta);
-			const y = 500 * Math.cos(phi);
-			const z = 500 * Math.sin(phi) * Math.sin(theta);
-
-			camera.lookAt(x, y, z);
-
-			renderer.render(scene, camera);
-
-		}
-
+	<div style="position:absolute;bottom:0%; left:50%; z-index: 9999;">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm"><br />
+					<button type="button" id="buttonLeft" class="btn btn-primary">
+						<i class="fas fa-arrow-left"></i>
+					</button>
+				</div>
+				<div class="col-sm">
+					<button type="button" id="buttonUp" class="btn btn-primary">
+						<i class="fas fa-arrow-up"></i>
+					</button><br /><br />
+					<button type="button" id="buttonDown" class="btn btn-primary">
+						<i class="fas fa-arrow-down"></i>
+					</button>
+				</div>
+				<div class="col-sm"><br />
+					<button type="button" id="buttonRight" class="btn btn-primary">
+						<i class="fas fa-arrow-right"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div style="position:absolute;top:0%; right:0%; z-index: 9999;">
+		<button type="button" id="buttonZoomIn" class="btn btn-primary">
+			<i class="fas fa-plus"></i>
+		</button><br/>
+		<button type="button" id="buttonZoomOut" class="btn btn-primary">
+			<i class="fas fa-minus"></i>
+		</button>
+	</div>
+
+
+	<div id="container" style="position: absolute; left:0px; top:0px"></div>
+	<div id="info" style="position: absolute; left:0px; top:0px">
+
+		<img id="textureimage" class="d-none" style="width:100%" src="" crossorigin="anonymous" style="display:none" />
+
+		<div class="input-group mb-3">
+			<button title="Open settings dialog" type="button" class="btn btn-primary" data-bs-toggle="modal"
+				data-bs-target="#settingsModal">
+				<i class="fas fa-cog"></i>
+			</button>
+			<button id="sharebutton" title="Open share dialog" type="button" class="btn btn-primary"
+				data-bs-toggle="modal" data-bs-target="#shareModal">
+				<i class="fas fa-share-alt"></i>
+			</button>
+		</div>
+
+
+		<!-- Settings Modal -->
+		<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div id="mymodal" class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="settingsModalLabel">360&#176; viewer settings</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<ul class="nav nav-pills mb-3 nav-justified" id="pills-tab" role="tablist">
+							<li class="nav-item" role="presentation">
+								<a class="nav-link active" id="pills-uri-tab" data-bs-toggle="tab" href="#pills-uri"
+									role="tab" aria-controls="pills-uri" aria-selected="true">URI</a>
+							</li>
+							<li class="nav-item" role="presentation">
+								<a class="nav-link" id="pills-clipboard-tab" data-bs-toggle="tab"
+									href="#pills-clipboard" role="tab" aria-controls="pills-clipboard"
+									aria-selected="false">Clipboard</a>
+							</li>
+						</ul>
+						<div class="tab-content" id="pills-tabContent">
+							<div class="tab-pane fade show active" id="pills-uri" role="tabpanel"
+								aria-labelledby="pills-uri-tab">
+								<textarea style="width:100%;height:50px;" id="textureUri"
+									placeholder="URI/Location of panorama 360&#176; image"></textarea>
+								<div id="uripreview">
+									<!-- <label for="uriimage">Preview:</label> -->
+									<img id="uriimage" style="width:100%" src="" crossorigin="anonymous" />
+								</div>
+								<div id="examplepanorama">
+									<span>Example: </span><a id="examplelink"
+										href="#">szpiglasowy_rafal_ociepka_360.jpg</a><span>©</span><a
+										href="https://tatromaniak.pl/aktualnosci/panorama-360-ze-szpiglasowego-wierchu/"
+										target="_blank">TatroManiak</a>
+								</div>
+							</div>
+							<div class="tab-pane fade" id="pills-clipboard" role="tabpanel"
+								aria-labelledby="pills-clipboard-tab">
+								<label for="floatingInputValue">Paste panorama 360&#176; image from clipboard
+									(CTRL+V)</label>
+							</div>
+							<div id="clipboardpreview">
+								<!-- <label for="clipboardimage">Preview:</label> -->
+								<img id="clipboardimage" style="width:100%" src="" crossorigin="anonymous" />
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-primary" id="button-apply">Apply</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Share Modal -->
+		<div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div id="mymodal" class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="shareModalLabel">360&#176; viewer share</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<textarea style="width:100%;height:50px;" id="shareUri" placeholder="share URI"
+							readonly="readonly"></textarea>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-primary" id="button-copy">Copy</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+		crossorigin="anonymous"></script>
+
+	<script type="module" src="index.js">
 	</script>
 </body>
 
