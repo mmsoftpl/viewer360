@@ -1,5 +1,5 @@
 import InitRenderer, { getCameraProps, onApply, setCameraProps, MoveUp, MoveDown, MoveLeft, MoveRight, ZoomIn, ZoomOut } from "./renderer.js";
-import { toShareLink, fromShareLink } from "./sharelink.js"
+import { toShareLink, fromShareLink, getPathFromUrl } from "./sharelink.js"
 
 const previewImage = () => {
     let src = document.getElementById('textureUri').value;
@@ -215,10 +215,11 @@ window.onload = () => {
     document.getElementById('button-copy').addEventListener('click', copyShareLink);
 
     document.getElementById('examplelink').addEventListener('click',
-        () => {
+        (e) => {
             document.getElementById("textureUri").innerText = "https://tatromaniak.pl/wp-content/uploads/2015/07/szpiglasowy_rafal_ociepka_360.jpg";
             document.getElementById('examplepanorama').remove();
             previewImage();
+            e.preventDefault();
         });
 
     var tabEl = document.querySelectorAll('[data-bs-toggle="tab"]')

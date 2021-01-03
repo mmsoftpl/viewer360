@@ -6,9 +6,10 @@ const latKey = "lat";
 const lonKey = "lon";
 
 export const getPathFromUrl = (url) => {
+  var ret = url;
   if (url.includes("?"))
-    return url.split("?")[0];  
-  return url
+    url = url.split("?")[0];  
+  return url.replace(/\/$/, "");
 }
 
 export const toShareLink = (uri, cameraProps) => {

@@ -45,6 +45,9 @@ export const eventFire = (el, etype) => {
     }
 }
 
+function IsString(value) {
+    return typeof value === 'string' || value instanceof String;
+}
 
 export function IsEmpty(value) {
     if (typeof value === "undefined") return true;
