@@ -5,6 +5,12 @@ const fovKey = "fov";
 const latKey = "lat";
 const lonKey = "lon";
 
+function getPathFromUrl(url) {
+  if (url.includes("?"))
+    return url.split("?")[0];  
+  return url
+}
+
 export const toShareLink = (uri, cameraProps) => {
   try {
     const variables = [];
@@ -14,7 +20,7 @@ export const toShareLink = (uri, cameraProps) => {
     variables.push(`${lonKey}=${cameraProps.lon}`);
     variables.push(`${uriKey}=${uri}`);//always at end
 
-    return `${window.location.origin}?ver=1&${variables.join("&")}`;
+    return `${getPathFromUrl(window.location.href)}?ver=1&${variables.join("&")}`;
   } catch {
     return "";
   }
